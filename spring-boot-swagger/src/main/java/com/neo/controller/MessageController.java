@@ -64,7 +64,7 @@ public class MessageController {
 	}
 
 	@PatchMapping(value="/message/text")
-	public BaseResult<Message> patch(Message message) {
+	public BaseResult<Message> patch(@RequestBody Message message) {
 		Message messageResult=this.messageRepository.updateText(message);
 		return BaseResult.successWithData(messageResult);
 	}
