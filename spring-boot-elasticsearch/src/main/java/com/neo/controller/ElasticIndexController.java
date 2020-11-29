@@ -94,7 +94,7 @@ public class ElasticIndexController extends BaseController {
                 + "                        \"tokenizer\": \"uax_url_email\"\n" + "                    }\n"
                 + "                }\n" + "            }\n" + "        }\n" + '}';
 
-        // when
+
         boolean index = elasticsearchRestTemplate.indexOps(IndexCoordinates.of("index")).create(parse(settings));
         return success();
     }
@@ -126,7 +126,13 @@ public class ElasticIndexController extends BaseController {
 
     @GetMapping("/putMappings")
     public ResponseResult putMappings() {
-        String mappings = "";
+        String mappings = "{\n" +
+                "    \"properties\": {\n" +
+                "      \"age\":    { \"type\": \"integer\" },  \n" +
+                "      \"email\":  { \"type\": \"keyword\"  }, \n" +
+                "      \"name\":   { \"type\": \"text\"  }     \n" +
+                "    }\n" +
+                "}";
 
         // when
         boolean index = elasticsearchRestTemplate.indexOps(IndexCoordinates.of("index")).putMapping(parse(mappings));
