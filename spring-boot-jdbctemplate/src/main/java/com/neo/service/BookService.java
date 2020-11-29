@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Auther: bcl
@@ -34,8 +36,8 @@ public class BookService {
 
     public void insertImage() throws IOException {
         System.out.println("createUser");
-        InputStream inputStream = new ClassPathResource("timg-2.jpeg").getInputStream();
-        byte[] bytes = inputStream2byte(new ClassPathResource("timg-2.jpeg").getInputStream());
+        InputStream inputStream = new ClassPathResource("image/timg-2.jpeg").getInputStream();
+        byte[] bytes = inputStream2byte(new ClassPathResource("image/timg-2.jpeg").getInputStream());
         String base64StringFun = Base64Util.byte2Base64StringFun(bytes);
 
 
@@ -44,7 +46,7 @@ public class BookService {
         jdbcTemplate.execute("INSERT INTO imagedb (image_name, content, description) VALUES (?, ?, ?)", new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
             @Override
             protected void setValues(PreparedStatement preparedStatement, LobCreator lobCreator) throws SQLException, DataAccessException {
-                preparedStatement.setString(1,"image");
+                preparedStatement.setString(1,new String(new char[]{'X'^88}));
                 try {
                     lobCreator.setBlobAsBinaryStream(preparedStatement, 2, inputStream, inputStream.available());
                 } catch (IOException e) {
@@ -53,6 +55,11 @@ public class BookService {
                 lobCreator.setClobAsString(preparedStatement, 3, "description");
             }
         });
+
+        List<Map<String, Object>> maps = jdbcTemplate.queryForList("select * from imagedb limit 2");
+        for (Map map : maps) {
+            System.out.println(map);
+        }
 
     }
 

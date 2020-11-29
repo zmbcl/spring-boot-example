@@ -1,8 +1,10 @@
 package com.neo.controller;
 
 import com.neo.config.BaseResult;
+import com.neo.model.Message;
 import com.neo.model.User;
 import io.swagger.annotations.*;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -72,5 +74,15 @@ public class UserController {
     public String ignoreMe(@PathVariable Long id) {
         users.remove(id);
         return "success";
+    }
+
+    @GetMapping("getMap")
+    public BaseResult<Map> getMap() {
+        Map<String,Object> map = new HashMap<>();
+        Message message = new Message();
+        message.setId(1L);
+        map.put("message", message);
+        map.put("id", 1);
+        return BaseResult.successWithData(map);
     }
 }

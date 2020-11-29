@@ -1,13 +1,32 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 <body>
 
 <h1>Spring Boot file upload example</h1>
 
 <form method="POST" action="/upload" enctype="multipart/form-data">
-    <input type="file" name="file" /><br/><br/>
+    <input id="File" name="file" accept="file/*.*" multiple="multiple" type="file" value="" /><br/><br/>
+<!--    <input type="file" name="file" /><br/><br/>-->
     <input type="submit" value="Submit" />
 </form>
+<div id="imgcontainer"></div>
 
+<script>
+    var xhr = new XMLHttpRequest();
+    xhr.open("get", "http://localhost:8080/download1", true);
+    xhr.responseType = "blob";
+    xhr.onload = function() {
+        if (this.status == 200) {
+            var blob = this.response;
+            var img = document.createElement("img");
+            img.onload = function(e) {
+                window.URL.revokeObjectURL(img.src);
+            };
+            img.src = window.URL.createObjectURL(blob);
+            $("#imgcontainer").html(img);
+        } }
+        xhr.send();
+</script>
 </body>
 </html>

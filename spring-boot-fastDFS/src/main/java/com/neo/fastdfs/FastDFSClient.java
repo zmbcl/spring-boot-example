@@ -11,14 +11,7 @@ import java.io.*;
 public class FastDFSClient {
 	private static org.slf4j.Logger logger = LoggerFactory.getLogger(FastDFSClient.class);
 
-	static {
-		try {
-			String filePath = new ClassPathResource("fdfs_client.conf").getFile().getAbsolutePath();;
-			ClientGlobal.init(filePath);
-		} catch (Exception e) {
-			logger.error("FastDFS Client Init Fail!",e);
-		}
-	}
+
 
 	public static String[] upload(FastDFSFile file) {
 		logger.info("File Name: " + file.getName() + "File Length:" + file.getContent().length);
@@ -67,6 +60,20 @@ public class FastDFSClient {
 			byte[] fileByte = storageClient.download_file(groupName, remoteFileName);
 			InputStream ins = new ByteArrayInputStream(fileByte);
 			return ins;
+		} catch (IOException e) {
+			logger.error("IO Exception: Get File from Fast DFS failed", e);
+		} catch (Exception e) {
+			logger.error("Non IO Exception: Get File from Fast DFS failed", e);
+		}
+		return null;
+	}
+
+	public static byte[] downFile1(String groupName, String remoteFileName) {
+		try {
+			StorageClient storageClient = getTrackerClient();
+			return storageClient.download_file(groupName, remoteFileName);
+//			InputStream ins = new ByteArrayInputStream(fileByte);
+//			return ins;
 		} catch (IOException e) {
 			logger.error("IO Exception: Get File from Fast DFS failed", e);
 		} catch (Exception e) {
