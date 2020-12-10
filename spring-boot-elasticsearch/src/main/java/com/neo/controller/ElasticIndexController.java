@@ -170,10 +170,11 @@ public class ElasticIndexController extends BaseController {
         object.put("index.number_of_replicas", replicas);
         boolean exist = elasticsearchRestTemplate.indexOps(IndexCoordinates.of("model")).exists();
         if (!exist) {
-            boolean result = elasticsearchRestTemplate.indexOps(IndexCoordinates.of("model")).create(Document.from((Map<String, Object>) object));
-            if (result) {
+            boolean result01 = elasticsearchRestTemplate.indexOps(IndexCoordinates.of("model")).create(Document.from((Map<String, Object>) object));
+            if (result01) {
                 Document document = elasticsearchRestTemplate.indexOps(ElasticSearchModel.class).createMapping();
-                if (document != null) {
+                boolean result02 = elasticsearchRestTemplate.indexOps(ElasticSearchModel.class).putMapping(document);
+                if (document != null && result02) {
                     return success(document);
                 }
                 return err("创建mapping失败");
