@@ -4,3 +4,6 @@ spring:
   elasticsearch:
     rest:
       uris: localhost:9200
+#elastic:
+#  shards: 1
+#  replicas: 0

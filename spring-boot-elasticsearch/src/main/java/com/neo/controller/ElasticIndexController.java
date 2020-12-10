@@ -1,5 +1,6 @@
 package com.neo.controller;
 
+import com.mysql.jdbc.StringUtils;
 import com.neo.model.ElasticSearchModel;
 import com.neo.repository.ModelRepository;
 import com.neo.response.ResponseResult;
@@ -11,6 +12,7 @@ import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.SearchHit;
@@ -46,6 +48,10 @@ import static org.springframework.data.elasticsearch.core.document.Document.pars
 @RequestMapping("/elastic")
 @RestController
 public class ElasticIndexController extends BaseController {
+    @Value(value = "${elastic.shards: 1}")
+    private int shards;
+    @Value("${elastic.replicas: 0}")
+    private int replicas;
     @Autowired
     private ElasticsearchRestTemplate elasticsearchRestTemplate;
     @Autowired
@@ -59,32 +65,30 @@ public class ElasticIndexController extends BaseController {
      * @Date: 2020/11/29
      * @Time: 2:34 下午
      */
-    @GetMapping(value = "/old")
+    @GetMapping(value = "/deprecatedCreateIndexAndMapping")
+    @Deprecated
     public ResponseResult oldCreate() {
-        boolean b0 = elasticsearchRestTemplate.createIndex("myindex");
-        boolean b1 = elasticsearchRestTemplate.putMapping(ElasticSearchModel.class);
-        return success();
+        boolean result01 = elasticsearchRestTemplate.createIndex("myindex");
+        boolean result02 = elasticsearchRestTemplate.putMapping(ElasticSearchModel.class);
+        return success(result01 + "&" + result02);
     }
 
-    /**
-     * @Author: bcl
-     * @Company: Hunters
-     * @Description: 通过配置参数创建索引
-     * @Params:
-     * @Date: 2020/11/29
-     * @Time: 2:34 下午
-     */
+
     @GetMapping(value = "/createIndexByParamters")
     public ResponseResult createIndexByParamters() {
         Map<String, Object> object = new HashMap<>();
-        object.put("index.number_of_shards", 1);
-        object.put("index.number_of_replicas", 0);
-        boolean exist = elasticsearchRestTemplate.indexOps(IndexCoordinates.of("index")).exists();
+        object.put("index.number_of_shards", shards);
+        object.put("index.number_of_replicas", replicas);
+        boolean exist = elasticsearchRestTemplate.indexOps(IndexCoordinates.of("model")).exists();
         if (!exist) {
-            elasticsearchRestTemplate.indexOps(IndexCoordinates.of("index")).create(Document.from((Map<String, Object>) object));
+            boolean result = elasticsearchRestTemplate.indexOps(IndexCoordinates.of("model")).create(Document.from((Map<String, Object>) object));
+            if (result) {
+                return success(result);
+            }
         }
-        return success();
+        return err();
     }
+
     @GetMapping(value = "/createIndexByJson")
     public ResponseResult createIndexByJson() {
         String settings = "{\n" + "        \"index\": {\n" + "            \"number_of_shards\": \"1\",\n"
@@ -93,8 +97,6 @@ public class ElasticIndexController extends BaseController {
                 + "                        \"type\": \"custom\",\n"
                 + "                        \"tokenizer\": \"uax_url_email\"\n" + "                    }\n"
                 + "                }\n" + "            }\n" + "        }\n" + '}';
-
-
         boolean index = elasticsearchRestTemplate.indexOps(IndexCoordinates.of("index")).create(parse(settings));
         return success();
     }
@@ -111,17 +113,38 @@ public class ElasticIndexController extends BaseController {
     public ResponseResult createIndex() {
         boolean exists = elasticsearchRestTemplate.indexOps(ElasticSearchModel.class).exists();
         if (!exists) {
-            boolean isCreate = elasticsearchRestTemplate.indexOps(ElasticSearchModel.class).create();
-            elasticsearchRestTemplate.indexOps(ElasticSearchModel.class).createMapping();
+            boolean result01 = elasticsearchRestTemplate.indexOps(ElasticSearchModel.class).create();
+            if (result01) {
+                Document document = elasticsearchRestTemplate.indexOps(ElasticSearchModel.class).createMapping();
+                return success(document);
+            }
+            else {
+                return err();
+            }
         }
-        return success();
+        else {
+            return success("索引已存在");
+        }
+    }
+
+    @GetMapping("/createMapping")
+    public ResponseResult createMapping() {
+        Document document = elasticsearchRestTemplate.indexOps(ElasticSearchModel.class).createMapping();
+        if (document != null) {
+            return success(document);
+        }
+        return err();
     }
 
 
-    @GetMapping("/oldPutMappings")
-    public ResponseResult oldPutMappings() {
-        elasticsearchRestTemplate.putMapping(ElasticSearchModel.class);
-        return success();
+    @GetMapping("/deprecatedPutMappings")
+    @Deprecated
+    public ResponseResult deprecatedPutMappings() {
+        boolean result = elasticsearchRestTemplate.putMapping(ElasticSearchModel.class);
+        if (result) {
+            return success();
+        }
+        return err();
     }
 
     @GetMapping("/putMappings")
@@ -133,23 +156,49 @@ public class ElasticIndexController extends BaseController {
                 "      \"name\":   { \"type\": \"text\"  }     \n" +
                 "    }\n" +
                 "}";
+        boolean result = elasticsearchRestTemplate.indexOps(IndexCoordinates.of("index")).putMapping(parse(mappings));
+        if (result) {
+            return success();
+        }
+        return err();
+    }
 
-        // when
-        boolean index = elasticsearchRestTemplate.indexOps(IndexCoordinates.of("index")).putMapping(parse(mappings));
-
-        return success();
+    @GetMapping("/createIndexAndMapping")
+    public ResponseResult createIndexAndMapping() {
+        Map<String, Object> object = new HashMap<>();
+        object.put("index.number_of_shards", shards);
+        object.put("index.number_of_replicas", replicas);
+        boolean exist = elasticsearchRestTemplate.indexOps(IndexCoordinates.of("model")).exists();
+        if (!exist) {
+            boolean result = elasticsearchRestTemplate.indexOps(IndexCoordinates.of("model")).create(Document.from((Map<String, Object>) object));
+            if (result) {
+                Document document = elasticsearchRestTemplate.indexOps(ElasticSearchModel.class).createMapping();
+                if (document != null) {
+                    return success(document);
+                }
+                return err("创建mapping失败");
+            }
+            else {
+                return err("创建索引失败");
+            }
+        }
+        return err();
     }
 
 
     @GetMapping(value = "/exist/{index}")
     public ResponseResult indexExist(@PathVariable(value = "index") String index) {
-
+        boolean result = elasticsearchRestTemplate.indexOps(IndexCoordinates.of("index")).exists();
         return success();
     }
 
     @GetMapping(value = "/del/{index}")
     public ResponseResult indexDel(@PathVariable(value = "index") String index) {
-        return success();
+        boolean result = elasticsearchRestTemplate.indexOps(IndexCoordinates.of(index)).delete();
+        if (result) {
+            return success();
+        }
+        return err();
     }
 
     @GetMapping("/addDocument")
@@ -158,7 +207,7 @@ public class ElasticIndexController extends BaseController {
                 .setId(32311)
                 .setDocid(9456)
                 .setItemid(4114)
-                .setItemType("采风")
+                .setItemname("采风")
                 .setDocclobnohtml("中华人民共和国银行业监督管理办法处理调理山东老家了")
                 .setDoctitle("云南银保监局机关行政处罚信息公开表")
                 .setPublishdate(new Date(System.currentTimeMillis()))
@@ -167,25 +216,23 @@ public class ElasticIndexController extends BaseController {
                 .setDocumentno("0002")
                 .setYear("2020")
                 .setName("bcl")
-                .setDocUuid(UUID.randomUUID().toString().replace("-", ""))
+                .setDocuuid(UUID.randomUUID().toString().replace("-", ""))
                 .setDatafrom("datafrom2")
                 .setBuilddate("2020-08-26")
-                .setSolicitFlag("solicit")
-                .setDocSummary("docSummary");
+                .setSolicitflag("solicit")
+                .setDocsummary("docSummary");
         modelRepository.save(model);
         return success();
     }
 
     @GetMapping(value = "queryDemo")
     public ResponseResult queryDemo() {
-
         String message = "中华";
         String field = "docclobnohtml";
         String sortField = "docid";
         String sortRule = "ASC";
         int page = 1;
         int size = 1;
-
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withSort(SortBuilders.fieldSort(sortField).order(SortOrder.valueOf(sortRule)))
                 .withPageable(PageRequest.of(page, size))

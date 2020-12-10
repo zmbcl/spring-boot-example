@@ -29,12 +29,12 @@ public class ElasticSearchModel {
     @Field(type = FieldType.Keyword)
     private String itemname;
     @Field(type = FieldType.Keyword)
-    private String itemType;
+    private String itemtype;
     @Field(type = FieldType.Text, analyzer = "ik_smart")
     private String docclobnohtml;
     @Field(type = FieldType.Text, analyzer = "ik_smart")
-    private String doctitle;
-    @Field(type = FieldType.Date,format = DateFormat.date)
+    private String docsubtitle;
+    @Field(type = FieldType.Date,format = DateFormat.basic_date_time_no_millis)
     private Date publishdate;
     @Field(type = FieldType.Keyword)
     private String orgcode;
@@ -47,7 +47,7 @@ public class ElasticSearchModel {
     @Field(type = FieldType.Keyword)
     private String name;
     @Field(type = FieldType.Keyword)
-    private String docUuid;
+    private String docuuid;
     @Field(type = FieldType.Keyword)
     private String datafrom;
     @Field(type = FieldType.Keyword)
@@ -55,9 +55,9 @@ public class ElasticSearchModel {
     @Field(type = FieldType.Keyword)
     private String builddate;
     @Field(type = FieldType.Keyword)
-    private String docTitle;
+    private String doctitle;
     @Field(type = FieldType.Keyword)
-    private String solicitFlag;
+    private String solicitflag;
     @Field(type = FieldType.Keyword)
-    private String docSummary;
+    private String docsummary;
 }

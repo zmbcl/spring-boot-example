@@ -12,7 +12,19 @@ public class BaseController {
         return new ResponseResult();
     }
 
-    protected<T> ResponseResult success(T t){
+    protected ResponseResult success(String message) {
+        return new ResponseResult(ResponseResult.SUCCESS_CODE, message);
+    }
+
+    protected <T> ResponseResult success(T t) {
         return new ResponseResult(t);
+    }
+
+    protected ResponseResult err() {
+        return ResponseResult.err();
+    }
+
+    protected ResponseResult err(String message) {
+        return ResponseResult.err();
     }
 }
