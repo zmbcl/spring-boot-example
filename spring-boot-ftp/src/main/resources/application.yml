@@ -1,0 +1,10 @@
+debug: true
+spring:
+  devtools:
+    restart:
+      enable: true
+
+remoteServer:
+  url: 192.168.196.132
+  username: root
+  password: root
