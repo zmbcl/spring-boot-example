@@ -31,7 +31,7 @@ public class NewJob {
                 LOGGER.info("-------{}----",i);
                 feature = CompletableFuture.supplyAsync(() -> {
                     try {
-                        TimeUnit.SECONDS.sleep(30);
+                        TimeUnit.SECONDS.sleep(3);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
