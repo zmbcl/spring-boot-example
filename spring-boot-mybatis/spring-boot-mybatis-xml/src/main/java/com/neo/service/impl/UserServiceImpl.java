@@ -20,8 +20,8 @@ public class UserServiceImpl implements UserService {
     @Resource
     private UserMapper userMapper;
     @Override
-    public List<User> getAll() {
-        return userMapper.getAll();
+    public List<User> getAll(int delFlag) {
+        return userMapper.getAll(delFlag);
     }
 
     @Override

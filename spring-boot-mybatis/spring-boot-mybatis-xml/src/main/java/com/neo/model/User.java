@@ -12,6 +12,15 @@ public class User implements Serializable {
 	private String passWord;
 	private UserSexEnum userSex;
 	private String nickName;
+	private Integer delFlag;
+
+	public Integer getDelFlag() {
+		return delFlag;
+	}
+
+	public void setDelFlag(Integer delFlag) {
+		this.delFlag = delFlag;
+	}
 
 	public User() {
 		super();

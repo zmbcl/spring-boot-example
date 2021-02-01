@@ -27,12 +27,12 @@ public class UserMapperTest {
 		userMapper.insert(new User("bb", "b123456", UserSexEnum.WOMAN));
 		userMapper.insert(new User("cc", "b123456", UserSexEnum.WOMAN));
 
-		Assert.assertEquals(3, userMapper.getAll().size());
+		Assert.assertEquals(3, userMapper.getAll(1).size());
 	}
 
 	@Test
 	public void testQuery() throws Exception {
-		List<User> users = userMapper.getAll();
+		List<User> users = userMapper.getAll(1);
 		if(users==null || users.size()==0){
 			System.out.println("is null");
 		}else{

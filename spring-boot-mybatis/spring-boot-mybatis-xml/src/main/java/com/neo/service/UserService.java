@@ -1,6 +1,7 @@
 package com.neo.service;
 
 import com.neo.model.User;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -10,7 +11,7 @@ import java.util.List;
  * @Date: Create in 11:09 上午 2020/10/27
  */
 public interface UserService {
-    List<User> getAll();
+    List<User> getAll( int delFlag);
 
     User getOne(Long id);
 

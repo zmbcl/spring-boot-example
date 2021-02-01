@@ -7,16 +7,22 @@
         <result column="passWord" property="passWord" jdbcType="VARCHAR" />
         <result column="user_sex" property="userSex" javaType="com.neo.enums.UserSexEnum"/>
         <result column="nick_name" property="nickName" jdbcType="VARCHAR" />
+        <result column="del_flag" property="delFlag" jdbcType="INTEGER"/>
     </resultMap>
     
     <sql id="Base_Column_List" >
         id, userName, passWord, user_sex, nick_name
     </sql>
 
-    <select id="getAll" resultMap="BaseResultMap"  >
+    <select id="getAll" resultMap="BaseResultMap">
        SELECT 
        <include refid="Base_Column_List" />
 	   FROM users
+	   <where>
+           <if test="delFlag != null">
+               del_flag = #{delFlag}
+           </if>
+       </where>
     </select>
 
     <select id="getOne" parameterType="java.lang.Long" resultMap="BaseResultMap" >
