@@ -1,2 +1,6 @@
 server:
   port: 8080
+
+limit:
+  whiteIps: 123.34.56.78
+  rateLimit: blockAuto
